@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX Customer</title>
+    <link href="assets/boostrap/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<!--======================================================With JSON======================================================-->
+
+<h1>Hello AJAX With JSON...</h1>
+<section class="container-fluid mt-3">
+    <div class="row mt-3">
+        <div class="col-4">
+            <form id="customerForm">
+                <input id="cusID" type="text" placeholder="Customer ID" name="customerID"><br><br>
+                <input id="cusName" type="text" placeholder="Customer Name" name="customerName"><br><br>
+                <input id="cusAddress" type="text" placeholder="Customer Address" name="customerAddress"><br><br>
+                <input id="cusSalary" type="text" placeholder="Customer Salary" name="customerSalary"><br><br>
+                <button id="btn3" type="button">Get</button>
+                <button id="btnSave" style="color: #0d6efd"  type="button">Save</button>
+                <button id="btnDelete" style="color: red"  type="button">Delete</button>
+                <button id="btnUpdate" style="color: greenyellow">Update</button>
+            </form>
+        </div>
+        <div class="col">
+            <table class="table table-bordered table-hover ">
+                <thead class="bg-primary text-white">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Salary</th>
+                </tr>
+                </thead>
+                <tbody id="tblCustomerJson">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+
+<script src="assets/jquery-3.7.0.min.js"></script>
+<script>
+    // ======================================================GET======================================================-->
+
+    loadAllCustomers();
+
+    function loadAllCustomers(){
+        $("#tblCustomerJson").empty();
+        $.ajax({
+            url:"http://localhost:8080/appone/customer",
+            method:"GET",
+            // dataType:"json",
+            success:function (resp){
+                console.log(resp);
+                for (const customer of resp) {
+                    let row=`<tr><td>${customer.id}</td><td>${customer.name}</td><td>${customer.address}</td><td>${customer.salary}</td></tr>`;
+                    $("#tblCustomerJson").append(row);
+                }
+                bindClickEvents();
+            }
+        });
+    }
+
+    // ==========================Get Select Value=====================================
+
+    function bindClickEvents(){
+        $("#tblCustomerJson>tr").click(function (){
+            let id=$(this).children().eq(0).text();
+            let name=$(this).children().eq(1).text();
+            let address=$(this).children().eq(2).text();
+            let salary=$(this).children().eq(3).text();
+
+            $("#cusID").val(id);
+            $("#cusName").val(name);
+            $("#cusAddress").val(address);
+            $("#cusSalary").val(salary);
+        });
+    }
+
+    $("#btn3").click(function (){
+        loadAllCustomers();
+    })
+
+    // ===================================================== POST==========================================================
+
+    $("#btnSave").click(function (){
+        var data = $("#customerForm").serialize();
+        $.ajax({
+            url: "http://localhost:8080/appone/customer",
+            method: "POST",
+            data:data,
+            success:function (resp){
+                alert(resp);
+                loadAllCustomers();
+            },error: function (ob,textStatus, error){
+                alert(textStatus);
+                console.log(ob.responseText);
+            }
+        });
+    });
+
+
+    // =====================================================DELETE==========================================================
+
+    $("#btnDelete").click(function (){
+         var customerID = $("#cusID").val();
+        $.ajax({
+            url :"http://localhost:8080/appone/customer?cusID="+customerID,
+            method:"DELETE",
+            success:function (resp){
+                alert(resp);
+                loadAllCustomers();
+            }
+        });
+    });
+
+    // =====================================================UPDATE==========================================================
+
+    // $("#btnUpdate").click(function (){
+    //     var dataForm = $("#customerForm").serialize();
+    //     console.log(dataForm);
+    //     $.ajax({
+    //         url: "http://localhost:8080/appone/customer?"+dataForm,
+    //         method:"PUT",
+    //         success:function (resp){
+    //             alert(resp);
+    //             loadAllCustomers();
+    //         }
+    //     })
+    // })
+    // $("#btnUpdate").click(function (){
+    //     var customerID = $("#cusID").val();
+    //     var customerName = $("#cusName").val();
+    //     var customerAddress = $("#cusAddress").val();
+    //     var customerSalary = $("#cusSalary").val();
+    //
+    //     var dataForm = JSON.stringify({
+    //         "customerID": customerID,
+    //         "customerName": customerName,
+    //         "customerAddress": customerAddress,
+    //         "customerSalary": customerSalary
+    //     });
+    //
+    //     $.ajax({
+    //         url: "http://localhost:8080/appone/customer",
+    //         data: dataForm,
+    //         method:"PUT",
+    //         contentType: "application/json",
+    //         success:function (resp){
+    //             alert(resp);
+    //             loadAllCustomers();
+    //         }
+    //     })
+    // });
+    $("#btnUpdate").click(function (){
+        var customerID = $("#cusID").val();
+        var customerName = $("#cusName").val();
+        var customerAddress = $("#cusAddress").val();
+        var customerSalary = $("#cusSalary").val();
+        var dataForm = {
+            "customerID": customerID,
+            "customerName": customerName,
+            "customerAddress": customerAddress,
+            "customerSalary": customerSalary
+        };
+        $.ajax({
+            url: "http://localhost:8080/appone/customer",
+            data: dataForm,
+            method:"PUT",
+            success:function (resp){
+                alert(resp);
+                loadAllCustomers();
+            }
+        })
+    });
+
+
+
+
+</script>
+
+</body>
+</html>
